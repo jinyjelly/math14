@@ -12,13 +12,17 @@
         #t-bar-box { width: 100%; height: 12px; background: #dcedc8; border-radius: 6px; margin-bottom: 15px; overflow: hidden; border: 1px solid #4caf50; }
         #t-bar-inner { width: 100%; height: 100%; background: linear-gradient(90deg, #8bc34a, #4caf50); transition: width 0.1s linear; }
         .st-bar { display: flex; justify-content: space-around; font-weight: bold; margin-bottom: 15px; color: #2e7d32; font-size: 1.1rem; }
-        .pr { font-size: 2rem; font-weight: bold; margin: 25px 0; min-height: 110px; display: flex; align-items: center; justify-content: center; color: #333; line-height: 1.5; }
+        
+        /* 수식 스타일 강조 */
+        .pr { font-size: 2.2rem; font-weight: bold; margin: 25px 0; min-height: 120px; display: flex; align-items: center; justify-content: center; color: #1b5e20; line-height: 1.6; }
+        sup { font-size: 0.6em; vertical-align: super; font-weight: bold; } 
+        
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .opt-btn { font-size: 1.15rem; padding: 15px 5px; background: #fff; border: 2px solid #4caf50; border-radius: 12px; cursor: pointer; font-weight: bold; color: #2e7d32; transition: 0.2s; }
-        #fb-msg { margin-top:15px; font-weight:bold; min-height: 4.5em; font-size: 1.1rem; line-height: 1.6; display: flex; align-items: center; justify-content: center; border: 2px dashed #4caf50; border-radius: 10px; background: #f9fbf9; padding: 10px; }
+        .opt-btn { font-size: 1.2rem; padding: 18px 5px; background: #fff; border: 2px solid #4caf50; border-radius: 12px; cursor: pointer; font-weight: bold; color: #2e7d32; transition: 0.2s; }
+        
+        #fb-msg { margin-top:15px; font-weight:bold; min-height: 4.5em; font-size: 1.2rem; line-height: 1.6; display: flex; align-items: center; justify-content: center; border: 2px dashed #4caf50; border-radius: 10px; background: #f9fbf9; padding: 10px; }
         .start-btn { font-size: 1.8rem; padding: 15px 40px; background: #4caf50; color: white; border: none; border-radius: 15px; cursor: pointer; font-weight: bold; margin-top: 40px; }
         .re-btn { font-size: 1.2rem; padding: 15px; background: #2e7d32; color: white; border: none; border-radius: 10px; cursor: pointer; width: 100%; margin-top: 20px; }
-        sup { font-size: 0.7em; } /* 제곱 표시 크기 조절 */
     </style>
 </head>
 <body>
@@ -27,7 +31,7 @@
 
     <div id="S_START" class="scr on">
         <h2 style="color:#2e7d32; margin-top: 40px;">🧪 인수분해 기초 챌린지</h2>
-        <p style="color:gray; line-height:1.6;">정확하게 인수분해 하세요!<br><span style="color:#d32f2f; font-weight:bold;">※ 오답 시 점수가 감점됩니다.</span></p>
+        <p style="color:gray; line-height:1.6;">정확하게 문제를 확인하고 답을 고르세요!<br><span style="color:#d32f2f; font-weight:bold;">※ 오답 시 점수가 감점됩니다.</span></p>
         <button id="GO_BTN" class="start-btn">시작하기!</button>
     </div>
 
@@ -54,20 +58,23 @@
     var ans = "", score = 0, timeLeft = 60, timer = null, isPaused = false;
     const bgm = document.getElementById('bgm');
 
-    // 수식을 HTML 태그(sup)를 사용해 예쁘게 구성
-    const problems = [
-        { q: "x<sup>2</sup> + 2x + 1 을<br>인수분해하면?", a: "(x + 1)<sup>2</sup>" },
-        { q: "x<sup>2</sup> - 4x + 4 를<br>인수분해하면?", a: "(x - 2)<sup>2</sup>" },
-        { q: "x<sup>2</sup> + 10x + 25 을<br>인수분해하면?", a: "(x + 5)<sup>2</sup>" },
-        { q: "4x<sup>2</sup> + 4x + 1 을<br>인수분해하면?", a: "(2x + 1)<sup>2</sup>" },
-        { q: "x<sup>2</sup> - 1 을<br>인수분해하면?", a: "(x + 1)(x - 1)" },
-        { q: "x<sup>2</sup> - 9 을<br>인수분해하면?", a: "(x + 3)(x - 3)" },
-        { q: "x<sup>2</sup> - 36 을<br>인수분해하면?", a: "(x + 6)(x - 6)" },
-        { q: "9x<sup>2</sup> - 16 을<br>인수분해하면?", a: "(3x + 4)(3x - 4)" },
-        { q: "x<sup>2</sup> + 6x + k 가<br>완전제곱식이 되려면?", a: "k = 9" },
-        { q: "x<sup>2</sup> - 14x + k 가<br>완전제곱식이 되려면?", a: "k = 49" },
-        { q: "x<sup>2</sup> + 18x + k 가<br>완전제곱식이 되려면?", a: "k = 81" },
-        { q: "x<sup>2</sup> - 4x + k 가<br>완전제곱식이 되려면?", a: "k = 4" }
+    // 유형별 데이터 분리
+    const type1 = [ // 인수분해 유형
+        { q: "x<sup>2</sup> + 4x + 4", a: "(x + 2)<sup>2</sup>" },
+        { q: "x<sup>2</sup> - 6x + 9", a: "(x - 3)<sup>2</sup>" },
+        { q: "x<sup>2</sup> + 12x + 36", a: "(x + 6)<sup>2</sup>" },
+        { q: "x<sup>2</sup> - 16", a: "(x + 4)(x - 4)" },
+        { q: "x<sup>2</sup> - 25", a: "(x + 5)(x - 5)" },
+        { q: "x<sup>2</sup> - 81", a: "(x + 9)(x - 9)" }
+    ];
+
+    const type2 = [ // 상수항 k 구하기 유형
+        { q: "x<sup>2</sup> + 10x + k<br>완전제곱식이면 k?", a: "25" },
+        { q: "x<sup>2</sup> - 4x + k<br>완전제곱식이면 k?", a: "4" },
+        { q: "x<sup>2</sup> + 8x + k<br>완전제곱식이면 k?", a: "16" },
+        { q: "x<sup>2</sup> - 14x + k<br>완전제곱식이면 k?", a: "49" },
+        { q: "x<sup>2</sup> + 20x + k<br>완전제곱식이면 k?", a: "100" },
+        { q: "x<sup>2</sup> - 2x + k<br>완전제곱식이면 k?", a: "1" }
     ];
 
     function init() {
@@ -75,15 +82,12 @@
         document.getElementById('S_RES').classList.remove('on');
         document.getElementById('S_QUIZ').classList.add('on');
         score = 0; timeLeft = 60; isPaused = false;
-        bgm.volume = 0.3;
-        bgm.play().catch(e => {});
-        updateUI();
-        make();
+        bgm.volume = 0.3; bgm.play().catch(e => {});
+        updateUI(); make();
         if(timer) clearInterval(timer);
         timer = setInterval(function() {
             if(!isPaused) {
-                timeLeft--;
-                updateUI();
+                timeLeft--; updateUI();
                 if(timeLeft <= 0) endGame();
             }
         }, 1000);
@@ -97,16 +101,21 @@
 
     function make() {
         isPaused = false;
-        document.getElementById('fb-msg').innerHTML = "알맞은 답을 고르세요!";
+        document.getElementById('fb-msg').innerHTML = "정답을 고르세요!";
         document.getElementById('fb-msg').style.backgroundColor = "#f9fbf9";
         
-        const item = problems[Math.floor(Math.random() * problems.length)];
+        // 유형 결정 (0이면 인수분해, 1이면 상수항)
+        const typeIdx = Math.floor(Math.random() * 2);
+        const currentPool = (typeIdx === 0) ? type1 : type2;
+        const item = currentPool[Math.floor(Math.random() * currentPool.length)];
+        
         document.getElementById('P_TXT').innerHTML = item.q;
         ans = item.a;
         
+        // 보기를 같은 풀 안에서만 생성 (숫자 문제엔 숫자만!)
         let os = [ans];
         while(os.length < 4) {
-            let w = problems[Math.floor(Math.random() * problems.length)].a;
+            let w = currentPool[Math.floor(Math.random() * currentPool.length)].a;
             if(os.indexOf(w) === -1) os.push(w);
         }
         os.sort(() => Math.random() - 0.5);
@@ -114,7 +123,7 @@
         const box = document.getElementById('O_BOX'); box.innerHTML = "";
         os.forEach(v => {
             const btn = document.createElement('button');
-            btn.className = 'opt-btn'; btn.innerHTML = v; // innerHTML을 써야 sup 태그가 작동함
+            btn.className = 'opt-btn'; btn.innerHTML = v;
             btn.onclick = () => { if(!isPaused) check(v); };
             box.appendChild(btn);
         });
@@ -123,14 +132,13 @@
     function check(v) {
         const fb = document.getElementById('fb-msg');
         if(v === ans) {
-            isPaused = true; 
-            score += 100;
+            isPaused = true; score += 100;
             fb.innerHTML = "<span style='color:blue;'>정답! +100 ✨</span>";
             fb.style.backgroundColor = "#e8f5e9";
             setTimeout(() => { make(); }, 800); 
         } else {
             score = Math.max(0, score - 100);
-            fb.innerHTML = "<span style='color:red;'>오답! -100점 💀<br>정답: " + ans + "</span>";
+            fb.innerHTML = "<span style='color:red;'>오답! -100💀<br>정답: " + ans + "</span>";
             fb.style.backgroundColor = "#ffebee";
             const btns = document.querySelectorAll('.opt-btn');
             btns.forEach(b => b.style.opacity = "0.5");
@@ -140,8 +148,7 @@
     }
 
     function endGame() {
-        clearInterval(timer);
-        bgm.pause();
+        clearInterval(timer); bgm.pause();
         document.getElementById('S_QUIZ').classList.remove('on');
         document.getElementById('S_RES').classList.add('on');
         document.getElementById('FINAL_SCORE').innerText = score;
