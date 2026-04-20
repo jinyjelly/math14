@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인수분해 기초 챌린지</title>
+    <style>
+        body { margin: 0; padding: 20px; background-color: #f1f8e9; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        #GAME_BOX { font-family: 'Malgun Gothic', sans-serif; text-align: center; background-color: #ffffff; padding: 20px; border-radius: 20px; border: 4px solid #4caf50; width: 100%; max-width: 420px; box-sizing: border-box; min-height: 620px; position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .scr { display: none; }
+        .scr.on { display: block; }
+        #t-bar-box { width: 100%; height: 12px; background: #dcedc8; border-radius: 6px; margin-bottom: 15px; overflow: hidden; border: 1px solid #4caf50; }
+        #t-bar-inner { width: 100%; height: 100%; background: linear-gradient(90deg, #8bc34a, #4caf50); transition: width 0.1s linear; }
+        .st-bar { display: flex; justify-content: space-around; font-weight: bold; margin-bottom: 15px; color: #2e7d32; font-size: 1.1rem; }
+        .pr { font-size: 1.8rem; font-weight: bold; margin: 25px 0; min-height: 110px; display: flex; align-items: center; justify-content: center; color: #333; line-height: 1.5; word-break: keep-all; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .opt-btn { font-size: 1.05rem; padding: 15px 5px; background: #fff; border: 2px solid #4caf50; border-radius: 12px; cursor: pointer; font-weight: bold; color: #2e7d32; transition: 0.2s; }
+        #fb-msg { margin-top:15px; font-weight:bold; min-height: 4.5em; font-size: 1.1rem; line-height: 1.6; display: flex; align-items: center; justify-content: center; border: 2px dashed #4caf50; border-radius: 10px; background: #f9fbf9; padding: 10px; }
+        .start-btn { font-size: 1.8rem; padding: 15px 40px; background: #4caf50; color: white; border: none; border-radius: 15px; cursor: pointer; font-weight: bold; margin-top: 40px; }
+        .re-btn { font-size: 1.2rem; padding: 15px; background: #2e7d32; color: white; border: none; border-radius: 10px; cursor: pointer; width: 100%; margin-top: 20px; }
+    </style>
+</head>
+<body>
+<div id="GAME_BOX">
+    <audio id="bgm" loop preload="auto" src="bgm.mp3"></audio>
+
+    <div id="S_START" class="scr on">
+        <h2 style="color:#2e7d32; margin-top: 40px;">🧪 인수분해 기초 챌린지</h2>
+        <p style="color:gray; line-height:1.6; font-size: 0.95rem;">
+            완전제곱식 / 합차 공식 / 상수항 찾기<br>
+            <span style="color:#d32f2f; font-weight:bold;">※ 오답 시 점수가 감점됩니다!</span>
+        </p>
+        <button id="GO_BTN" class="start-btn">시작하기!</button>
+    </div>
+
+    <div id="S_QUIZ" class="scr">
+        <div id="t-bar-box"><div id="t-bar-inner"></div></div>
+        <div class="st-bar">
+            <div>점수: <span id="SCORE_VAL">0</span></div>
+            <div>시간: <span id="TIME_VAL">60</span>초</div>
+        </div>
+        <div id="P_TXT" class="pr"></div>
+        <div id="O_BOX" class="btn-grid"></div>
+        <div id="fb-msg">신중하게 인수분해 하세요!</div>
+    </div>
+
+    <div id="S_RES" class="scr">
+        <h2 style="color:#2e7d32;">🏁 결과 확인</h2>
+        <p style="font-size: 2rem; margin: 10px 0;">최종 점수: <span id="FINAL_SCORE" style="color:red;">0</span>점</p>
+        <button id="RE_BTN" class="re-btn">한 번 더 도전!</button>
+    </div>
+</div>
+
+<script>
+(function() {
+    var ans = "", score = 0, timeLeft = 60, timer = null, isPaused = false;
+    const bgm = document.getElementById('bgm');
+
+    // 문제 데이터 구성 (선생님 요청 3가지 유형)
+    const problems = [
+        /* 유형1: 완전제곱식 */
+        { q: "$x^2 + 2x + 1$을<br>인수분해하면?", a: "$(x+1)^2$" },
+        { q: "$x^2 - 4x + 4$를<br>인수분해하면?", a: "$(x-2)^2$" },
+        { q: "$x^2 + 10x + 25$를<br>인수분해하면?", a: "$(x+5)^2$" },
+        { q: "$4x^2 - 12x + 9$를<br>인수분해하면?", a: "$(2x-3)^2$" },
+        
+        /* 유형2: 합차 공식 */
+        { q: "$x^2 - 1$을<br>인수분해하면?", a: "$(x+1)(x-1)$" },
+        { q: "$x^2 - 16$을<br>인수분해하면?", a: "$(x+4)(x-4)$" },
+        { q: "$x^2 - 49$을<br>인수분해하면?", a: "$(x+7)(x-7)$" },
+        { q: "$4x^2 - 25$를<br>인수분해하면?", a: "$(2x+5)(2x-5)$" },
+        
+        /* 유형3: 완전제곱식이 되기 위한 상수항 k */
+        { q: "$x^2 + 6x + k$가<br>완전제곱식이 되려면?", a: "k = 9" },
+        { q: "$x^2 - 8x + k$가<br>완전제곱식이 되려면?", a: "k = 16" },
+        { q: "$x^2 + 12x + k$가<br>완전제곱식이 되려면?", a: "k = 36" },
+        { q: "$x^2 - 20x + k$가<br>완전제곱식이 되려면?", a: "k = 100" }
+    ];
+
+    function init() {
+        document.getElementById('S_START').classList.remove('on');
+        document.getElementById('S_RES').classList.remove('on');
+        document.getElementById('S_QUIZ').classList.add('on');
+        score = 0; timeLeft = 60; isPaused = false;
+        bgm.volume = 0.3;
+        bgm.play().catch(e => {});
+        updateUI();
+        make();
+        if(timer) clearInterval(timer);
+        timer = setInterval(function() {
+            if(!isPaused) {
+                timeLeft--;
+                updateUI();
+                if(timeLeft <= 0) endGame();
+            }
+        }, 1000);
+    }
+
+    function updateUI() {
+        document.getElementById('SCORE_VAL').innerText = score;
+        document.getElementById('TIME_VAL').innerText = timeLeft;
+        document.getElementById('t-bar-inner').style.width = (timeLeft / 60 * 100) + "%";
+    }
+
+    function make() {
+        isPaused = false;
+        document.getElementById('fb-msg').innerHTML = "알맞은 답을 고르세요!";
+        document.getElementById('fb-msg').style.backgroundColor = "#f9fbf9";
+        
+        const item = problems[Math.floor(Math.random() * problems.length)];
+        // 수식 기호 보정 ($x^2$ 등을 예쁘게 표시)
+        document.getElementById('P_TXT').innerHTML = item.q.replace(/\$x\^2\$/g, "x²");
+        ans = item.a;
+        
+        let os = [ans];
+        while(os.length < 4) {
+            let w = problems[Math.floor(Math.random() * problems.length)].a;
+            if(os.indexOf(w) === -1) os.push(w);
+        }
+        os.sort(() => Math.random() - 0.5);
+
+        const box = document.getElementById('O_BOX'); box.innerHTML = "";
+        os.forEach(v => {
+            const btn = document.createElement('button');
+            btn.className = 'opt-btn'; btn.innerText = v.replace(/\^2/g, "²");
+            btn.onclick = () => { if(!isPaused) check(v); };
+            box.appendChild(btn);
+        });
+    }
+
+    function check(v) {
+        const fb = document.getElementById('fb-msg');
+        if(v === ans) {
+            isPaused = true; 
+            score += 100;
+            fb.innerHTML = "<span style='color:blue;'>정답! +100 ✨</span>";
+            fb.style.backgroundColor = "#e8f5e9";
+            setTimeout(() => { make(); }, 800); 
+        } else {
+            score = Math.max(0, score - 100);
+            fb.innerHTML = "<span style='color:red;'>오답! -100점 💀<br>정답: " + ans.replace(/\^2/g, "²") + "</span>";
+            fb.style.backgroundColor = "#ffebee";
+            const btns = document.querySelectorAll('.opt-btn');
+            btns.forEach(b => b.style.opacity = "0.5");
+            setTimeout(() => { make(); }, 2000); 
+        }
+        updateUI();
+    }
+
+    function endGame() {
+        clearInterval(timer);
+        bgm.pause();
+        document.getElementById('S_QUIZ').classList.remove('on');
+        document.getElementById('S_RES').classList.add('on');
+        document.getElementById('FINAL_SCORE').innerText = score;
+    }
+
+    document.getElementById('GO_BTN').onclick = init;
+    document.getElementById('RE_BTN').onclick = init;
+})();
+</script>
+</body>
+</html>
