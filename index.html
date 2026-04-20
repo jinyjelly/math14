@@ -13,12 +13,12 @@
         #t-bar-inner { width: 100%; height: 100%; background: linear-gradient(90deg, #8bc34a, #4caf50); transition: width 0.1s linear; }
         .st-bar { display: flex; justify-content: space-around; font-weight: bold; margin-bottom: 15px; color: #2e7d32; font-size: 1.1rem; }
         
-        /* ★ 수식 및 지수 크기 대폭 강화 ★ */
-        .pr { font-size: 2.5rem; font-weight: bold; margin: 25px 0; min-height: 120px; display: flex; align-items: center; justify-content: center; color: #1b5e20; line-height: 1.6; }
-        sup { font-size: 0.8em; vertical-align: 0.4em; font-weight: bold; } 
+        /* ★ 수식 스타일: 절대 줄바꿈 금지(nowrap) ★ */
+        .pr { font-size: 2.3rem; font-weight: bold; margin: 25px 0; min-height: 120px; display: flex; align-items: center; justify-content: center; color: #1b5e20; line-height: 1.4; white-space: nowrap; }
+        sup { font-size: 0.7em; vertical-align: 0.5em; font-weight: bold; } 
         
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .opt-btn { font-size: 1.3rem; padding: 18px 5px; background: #fff; border: 2px solid #4caf50; border-radius: 12px; cursor: pointer; font-weight: bold; color: #2e7d32; transition: 0.2s; }
+        .opt-btn { font-size: 1.25rem; padding: 18px 5px; background: #fff; border: 2px solid #4caf50; border-radius: 12px; cursor: pointer; font-weight: bold; color: #2e7d32; transition: 0.2s; white-space: nowrap; }
         
         #fb-msg { margin-top:15px; font-weight:bold; min-height: 4.5em; font-size: 1.2rem; line-height: 1.6; display: flex; align-items: center; justify-content: center; border: 2px dashed #4caf50; border-radius: 10px; background: #f9fbf9; padding: 10px; }
         .start-btn { font-size: 1.8rem; padding: 15px 40px; background: #4caf50; color: white; border: none; border-radius: 15px; cursor: pointer; font-weight: bold; margin-top: 40px; }
@@ -31,7 +31,7 @@
 
     <div id="S_START" class="scr on">
         <h2 style="color:#2e7d32; margin-top: 40px;">🧪 인수분해 기초 챌린지</h2>
-        <p style="color:gray; line-height:1.6;">문제를 보고 알맞은 답을 고르세요!<br><span style="color:#d32f2f; font-weight:bold;">※ 오답 시 점수가 감점됩니다.</span></p>
+        <p style="color:gray; line-height:1.6;">정확하게 문제를 확인하고 답을 고르세요!<br><span style="color:#d32f2f; font-weight:bold;">※ 오답 시 점수가 감점됩니다.</span></p>
         <button id="GO_BTN" class="start-btn">시작하기!</button>
     </div>
 
@@ -43,7 +43,7 @@
         </div>
         <div id="P_TXT" class="pr"></div>
         <div id="O_BOX" class="btn-grid"></div>
-        <div id="fb-msg">신중하게 선택하세요!</div>
+        <div id="fb-msg">문제를 보고 정답을 고르세요!</div>
     </div>
 
     <div id="S_RES" class="scr">
@@ -58,24 +58,24 @@
     var ans = "", score = 0, timeLeft = 60, timer = null, isPaused = false;
     const bgm = document.getElementById('bgm');
 
-    // 유형1: 인수분해 (보기는 식만!)
+    // 유형1: 인수분해
     const type1 = [
         { q: "x<sup>2</sup> + 4x + 4", a: "(x + 2)<sup>2</sup>" },
         { q: "x<sup>2</sup> - 10x + 25", a: "(x - 5)<sup>2</sup>" },
-        { q: "x<sup>2</sup> + 14x + 49", a: "(x + 7)<sup>2</sup>" },
+        { q: "x<sup>2</sup> + 6x + 9", a: "(x + 3)<sup>2</sup>" },
         { q: "x<sup>2</sup> - 1", a: "(x + 1)(x - 1)" },
-        { q: "x<sup>2</sup> - 36", a: "(x + 6)(x - 6)" },
-        { q: "x<sup>2</sup> - 64", a: "(x + 8)(x - 8)" }
+        { q: "x<sup>2</sup> - 49", a: "(x + 7)(x - 7)" },
+        { q: "x<sup>2</sup> - 100", a: "(x + 10)(x - 10)" }
     ];
 
     // 유형2: 상수항 k 구하기 (보기는 숫자만!)
     const type2 = [
-        { q: "x<sup>2</sup> + 6x + k<br>k = ?", a: "9" },
-        { q: "x<sup>2</sup> - 12x + k<br>k = ?", a: "36" },
-        { q: "x<sup>2</sup> + 16x + k<br>k = ?", a: "64" },
-        { q: "x<sup>2</sup> - 20x + k<br>k = ?", a: "100" },
-        { q: "x<sup>2</sup> + 2x + k<br>k = ?", a: "1" },
-        { q: "x<sup>2</sup> - 8x + k<br>k = ?", a: "16" }
+        { q: "x<sup>2</sup> + 10x + k 가<br>완전제곱식이면 k?", a: "25" },
+        { q: "x<sup>2</sup> - 4x + k 가<br>완전제곱식이면 k?", a: "4" },
+        { q: "x<sup>2</sup> + 8x + k 가<br>완전제곱식이면 k?", a: "16" },
+        { q: "x<sup>2</sup> - 14x + k 가<br>완전제곱식이면 k?", a: "49" },
+        { q: "x<sup>2</sup> + 20x + k 가<br>완전제곱식이면 k?", a: "100" },
+        { q: "x<sup>2</sup> - 12x + k 가<br>완전제곱식이면 k?", a: "36" }
     ];
 
     function init() {
